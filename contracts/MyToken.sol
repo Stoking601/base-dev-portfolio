@@ -7,7 +7,9 @@ contract MyToken {
     string public name;
     string public symbol;
 
-    // 🔥 EVENT (NEW)
+    // 🔥 NEW: balance system
+    mapping(address => uint256) public balanceOf;
+
     event MessageUpdated(string oldMessage, string newMessage);
 
     constructor(
@@ -17,22 +19,20 @@ contract MyToken {
         message = "Hello Base";
         name = _name;
         symbol = _symbol;
+
+        // 🔥 give initial balance to deployer
+        balanceOf[msg.sender] = 1000;
     }
 
     function setMessage(string memory _message) public {
         string memory old = message;
-
         message = _message;
-
-        // 🔥 emit event
         emit MessageUpdated(old, _message);
     }
 
     function resetMessage() public {
         string memory old = message;
-
         message = "Hello Base";
-
         emit MessageUpdated(old, "Hello Base");
     }
 
