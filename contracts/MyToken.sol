@@ -54,13 +54,18 @@ contract MyToken {
     // Transfer
     // =========================
     function transfer(address to, uint256 value) public returns (bool) {
-        require(balanceOf[msg.sender] >= value, "Insufficient balance");
 
-        balanceOf[msg.sender] -= value;
-        balanceOf[to] += value;
+    require(to != address(0), "Invalid address");
+    require(to != msg.sender, "Cannot transfer to yourself");
+    require(value > 0, "Amount must be greater than 0");
+    require(balanceOf[msg.sender] >= value, "Insufficient balance");
 
-        emit Transfer(msg.sender, to, value);
-        return true;
+    balanceOf[msg.sender] -= value;
+    balanceOf[to] += value;
+
+    emit Transfer(msg.sender, to, value);
+
+    return true;
     }
 
     // =========================
