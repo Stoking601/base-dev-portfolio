@@ -7,6 +7,9 @@ contract MyToken {
     string public name;
     string public symbol;
 
+    // 🔥 EVENT (NEW)
+    event MessageUpdated(string oldMessage, string newMessage);
+
     constructor(
         string memory _name,
         string memory _symbol
@@ -16,16 +19,23 @@ contract MyToken {
         symbol = _symbol;
     }
 
-    // 🔥 write function
     function setMessage(string memory _message) public {
+        string memory old = message;
+
         message = _message;
+
+        // 🔥 emit event
+        emit MessageUpdated(old, _message);
     }
 
     function resetMessage() public {
+        string memory old = message;
+
         message = "Hello Base";
+
+        emit MessageUpdated(old, "Hello Base");
     }
 
-    // 👀 READ ONLY FUNCTION (NEW)
     function getInfo() public view returns (
         string memory,
         string memory,
