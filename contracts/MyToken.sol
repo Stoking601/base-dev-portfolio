@@ -23,10 +23,20 @@ contract MyToken {
     mapping(address => mapping(address => uint256)) public allowance;
 
     // =========================
-    // Events
+    // Events (Advanced)
     // =========================
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    event Transfer(
+    address indexed from,
+    address indexed to,
+    uint256 value
+    );
+
+    event Approval(
+    address indexed owner,
+    address indexed spender,
+    uint256 value
+    );
 
     // =========================
     // Constructor
