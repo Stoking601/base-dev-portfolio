@@ -9,8 +9,17 @@ contract MyToken {
 
     mapping(address => uint256) public balanceOf;
 
+    // 🔥 NEW: allowance system
+    mapping(address => mapping(address => uint256)) public allowance;
+
     event MessageUpdated(string oldMessage, string newMessage);
     event Transfer(address indexed from, address indexed to, uint256 amount);
+
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 amount
+    );
 
     constructor(
         string memory _name,
@@ -43,7 +52,7 @@ contract MyToken {
         return (message, name, symbol);
     }
 
-    // 🔥 CORE FUNCTION (ERC-20 STYLE)
+    // 🔥 transfer
     function transfer(address to, uint256 amount) public {
         require(balanceOf[msg.sender] >= amount, "Not enough balance");
 
@@ -51,5 +60,24 @@ contract MyToken {
         balanceOf[to] += amount;
 
         emit Transfer(msg.sender, to, amount);
+    }
+
+    // 🔥 approve (NEW)
+    function approve(address spender, uint256 amount) public {
+        allowance[msg.sender][spender] = amount;
+
+        emit Approval(msg.sender, spender, amount);
+    }
+
+    // 🔥 transferFrom (NEW)
+    function transferFrom(address from, address to, uint256 amount) public {
+        require(balanceOf[from] >= amount, "Not enough balance");
+        require(allowance[from][msg.sender] >= amount, "Not allowed");
+
+        allowance[from][msg.sender] -= amount;
+        balanceOf[from] -= amount;
+        balanceOf[to] += amount;
+
+        emit Transfer(from, to, amount);
     }
 }
