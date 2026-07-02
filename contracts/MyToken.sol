@@ -4,7 +4,6 @@ pragma solidity ^0.8.24;
 contract MyToken {
 
     string public message;
-
     string public name;
     string public symbol;
 
@@ -17,14 +16,22 @@ contract MyToken {
         symbol = _symbol;
     }
 
-    // 🔥 Function 1: เปลี่ยน message
+    // 🔥 write function
     function setMessage(string memory _message) public {
         message = _message;
     }
 
-    // 🔄 Function 2: reset message
     function resetMessage() public {
         message = "Hello Base";
+    }
+
+    // 👀 READ ONLY FUNCTION (NEW)
+    function getInfo() public view returns (
+        string memory,
+        string memory,
+        string memory
+    ) {
+        return (message, name, symbol);
     }
 
 }
