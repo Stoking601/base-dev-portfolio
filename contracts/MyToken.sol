@@ -7,10 +7,10 @@ contract MyToken {
     string public name;
     string public symbol;
 
-    // 🔥 NEW: balance system
     mapping(address => uint256) public balanceOf;
 
     event MessageUpdated(string oldMessage, string newMessage);
+    event Transfer(address indexed from, address indexed to, uint256 amount);
 
     constructor(
         string memory _name,
@@ -20,7 +20,6 @@ contract MyToken {
         name = _name;
         symbol = _symbol;
 
-        // 🔥 give initial balance to deployer
         balanceOf[msg.sender] = 1000;
     }
 
@@ -44,4 +43,13 @@ contract MyToken {
         return (message, name, symbol);
     }
 
+    // 🔥 CORE FUNCTION (ERC-20 STYLE)
+    function transfer(address to, uint256 amount) public {
+        require(balanceOf[msg.sender] >= amount, "Not enough balance");
+
+        balanceOf[msg.sender] -= amount;
+        balanceOf[to] += amount;
+
+        emit Transfer(msg.sender, to, amount);
+    }
 }
