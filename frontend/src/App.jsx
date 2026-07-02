@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { BrowserProvider, Contract } from "ethers";
+import { BrowserProvider, Contract, formatUnits, parseUnits } from "ethers";
 import MyToken from "./abi/MyToken.json";
 import { CONTRACT_ADDRESS } from "./config";
-import { formatUnits } from "ethers";
 
 function App() {
   const [account, setAccount] = useState("");
@@ -10,11 +9,13 @@ function App() {
   const [symbol, setSymbol] = useState("");
   const [totalSupply, setTotalSupply] = useState("");
   const [balance, setBalance] = useState("");
+  const [to, setTo] = useState("");
+  const [amount, setAmount] = useState("");
 
-  // ⭐ ต้องอยู่นอก connectWallet
-  async function loadContractData() {
-    const provider = new BrowserProvider(window.ethereum);
-
+  // =========================
+  // Load contract data
+  // =========================
+  async function loadContractData(provider) {
     const contract = new Contract(
       CONTRACT_ADDRESS,
       MyToken.abi,
@@ -30,6 +31,24 @@ function App() {
     setTotalSupply(formatUnits(supply, 18));
   }
 
+  // =========================
+  // Load balance
+  // =========================
+  async function loadBalance(provider, userAddress) {
+    const contract = new Contract(
+      CONTRACT_ADDRESS,
+      MyToken.abi,
+      provider
+    );
+
+    const bal = await contract.balanceOf(userAddress);
+
+    setBalance(formatUnits(bal, 18));
+  }
+
+  // =========================
+  // Connect wallet
+  // =========================
   async function connectWallet() {
     if (!window.ethereum) {
       alert("Please install MetaMask");
@@ -42,24 +61,49 @@ function App() {
 
     setAccount(accounts[0]);
 
-    await loadContractData(); // ✅ ถูกแล้ว
-    await loadBalance(accounts[0]); // ⭐ เพิ่มตรงนี้
+    await loadContractData(provider);
+    await loadBalance(provider, accounts[0]);
   }
 
-  async function loadBalance(userAddress) {
-    const provider = new BrowserProvider(window.ethereum);
+  // =========================
+  // Transfer token
+  // =========================
+  async function transferToken() {
+    try {
+      if (!to || !amount) {
+        alert("Please fill address and amount");
+        return;
+      }
 
-    const contract = new Contract(
-      CONTRACT_ADDRESS,
-      MyToken.abi,
-      provider
-    );
+      const provider = new BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-    const bal = await contract.balanceOf(userAddress);
+      const contract = new Contract(
+        CONTRACT_ADDRESS,
+        MyToken.abi,
+        signer
+      );
 
-    setBalance(formatUnits(bal, 18));
+      const tx = await contract.transfer(
+        to,
+        parseUnits(amount, 18)
+      );
+
+      await tx.wait();
+
+      // refresh balance after transfer
+      await loadBalance(provider, account);
+
+      alert("Transfer successful!");
+    } catch (err) {
+      console.error(err);
+      alert("Transfer failed");
+    }
   }
 
+  // =========================
+  // UI
+  // =========================
   return (
     <div className="App">
       <h1>Base Dev Portfolio</h1>
@@ -76,13 +120,28 @@ function App() {
           <h3>Token Info</h3>
           <p>Name: {name}</p>
           <p>Symbol: {symbol}</p>
-          <h3>Token Info</h3>
-          <p>Name: {name}</p>
-          <p>Symbol: {symbol}</p>
           <p>Total Supply: {totalSupply}</p>
 
           <h3>My Balance</h3>
           <p>{balance}</p>
+
+          <h3>Transfer Token</h3>
+
+          <input
+            placeholder="To address"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+          />
+
+          <input
+            placeholder="Amount"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+
+          <button onClick={transferToken}>
+            Send Token
+          </button>
         </>
       )}
     </div>
