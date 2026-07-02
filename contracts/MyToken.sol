@@ -7,10 +7,13 @@ contract MyToken {
     string public name;
     string public symbol;
 
-    constructor() {
+    constructor(
+        string memory _name,
+        string memory _symbol
+    ) {
         message = "Hello Base";
-        name = "Base Learning Token";
-        symbol = "BLT";
+        name = _name;
+        symbol = _symbol;
     }
 
 }
