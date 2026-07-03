@@ -4,6 +4,7 @@ import {
   Contract,
   formatUnits,
   parseUnits,
+  isAddress,
 } from "ethers";
 import MyToken from "./abi/MyToken.json";
 import { CONTRACT_ADDRESS } from "./config";
@@ -17,6 +18,9 @@ function App() {
   const [to, setTo] = useState("");
   const [amount, setAmount] = useState("");
   const [transfers, setTransfers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [txStatus, setTxStatus] = useState("");
+  
 
   // =========================
   // Load contract data
@@ -97,9 +101,11 @@ function App() {
 
     setAccount(accounts[0]);
 
-    await loadContractData(provider);
-    await loadBalance(provider, accounts[0]);
-    await loadTransfers(provider);
+    await Promise.all([
+      loadContractData(provider),
+      loadBalance(provider, accounts[0]),
+      loadTransfers(provider),
+    ]);
   }
 
   // =========================
@@ -111,6 +117,19 @@ function App() {
         alert("Please fill address and amount");
         return;
       }
+
+      if (!isAddress(to)) {
+        alert("Invalid wallet address");
+        return;
+      }
+
+      if (Number(amount) <= 0) {
+        alert("Amount must be greater than 0");
+        return;
+      }
+
+      setLoading(true);
+      setTxStatus("Waiting for MetaMask confirmation...");
 
       const provider = new BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
@@ -126,24 +145,32 @@ function App() {
         parseUnits(amount, 18)
       );
 
+      setTxStatus("Transaction Pending...");
+
       await tx.wait();
 
-      await loadBalance(provider, account);
-      await loadTransfers(provider);
+      await Promise.all([
+        loadBalance(provider, account),
+        loadTransfers(provider),
+      ]);
 
       setTo("");
       setAmount("");
 
-      alert("Transfer successful!");
+      setTxStatus("Transaction Success!");
+
     } catch (err) {
       console.error(err);
 
-      alert(
+      setTxStatus(
         err.shortMessage ||
         err.reason ||
         err.message ||
-        "Transfer failed"
+        "Transaction Failed"
       );
+
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -192,8 +219,16 @@ function App() {
 
           <br />
 
-          <button onClick={transferToken}>
-            Send Token
+          <button
+            onClick={transferToken}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Send Token"}
+            {txStatus && (
+              <p>
+                <strong>Status:</strong> {txStatus}
+              </p>
+            )}
           </button>
 
           <hr />
@@ -222,7 +257,7 @@ function App() {
 
               <tbody>
                 {transfers.map((tx, index) => (
-                  <tr key={index}>
+                  <tr key={tx.txHash}>
                     <td>
                       {tx.from.slice(0, 6)}...
                       {tx.from.slice(-4)}
