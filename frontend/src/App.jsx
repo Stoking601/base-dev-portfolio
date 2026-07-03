@@ -8,7 +8,10 @@ import {
 } from "ethers";
 import MyToken from "./abi/MyToken.json";
 import { CONTRACT_ADDRESS } from "./config";
-import { getReadContract } from "./services/tokenService";
+import {
+  getReadContract,
+  loadContractData,
+} from "./services/tokenService";
 
 function App() {
   const [account, setAccount] = useState("");
@@ -22,26 +25,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   
-
-  // =========================
-  // Load contract data
-  // =========================
-  async function loadContractData(provider) {
-    const contract = new Contract(
-      CONTRACT_ADDRESS,
-      MyToken.abi,
-      provider
-    );
-
-    const tokenName = await contract.name();
-    const tokenSymbol = await contract.symbol();
-    const supply = await contract.totalSupply();
-
-    setName(tokenName);
-    setSymbol(tokenSymbol);
-    setTotalSupply(formatUnits(supply, 18));
-  }
-
   // =========================
   // Load balance
   // =========================
@@ -92,14 +75,31 @@ function App() {
       return;
     }
 
+    // สร้าง Provider
     const provider = new BrowserProvider(window.ethereum);
 
-    const accounts = await provider.send("eth_requestAccounts", []);
+    // ขอเชื่อมต่อ MetaMask
+    const accounts = await provider.send(
+      "eth_requestAccounts",
+      []
+    );
 
+    // เก็บ Address
     setAccount(accounts[0]);
 
+    // ===========================
+    // โหลดข้อมูล Token
+    // ===========================
+    const token = await loadContractData(provider);
+
+    setName(token.name);
+    setSymbol(token.symbol);
+    setTotalSupply(formatUnits(token.totalSupply, 18));
+
+    // ===========================
+    // โหลด Balance และ History
+    // ===========================
     await Promise.all([
-      loadContractData(provider),
       loadBalance(provider, accounts[0]),
       loadTransfers(provider),
     ]);
