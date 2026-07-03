@@ -8,6 +8,7 @@ import {
 } from "ethers";
 import MyToken from "./abi/MyToken.json";
 import { CONTRACT_ADDRESS } from "./config";
+import { getReadContract } from "./services/tokenService";
 
 function App() {
   const [account, setAccount] = useState("");
@@ -60,11 +61,7 @@ function App() {
   // Load transfer history
   // =========================
   async function loadTransfers(provider) {
-    const contract = new Contract(
-      CONTRACT_ADDRESS,
-      MyToken.abi,
-      provider
-    );
+    const contract = getReadContract(provider);
 
     const latestBlock = await provider.getBlockNumber();
 
