@@ -47,3 +47,26 @@ export async function loadContractData(provider) {
     totalSupply: supply,
   };
 }
+
+// =========================================
+// Load Wallet Balance
+// อ่านจำนวน Token ของ Wallet
+//
+// Parameter
+// provider
+// userAddress
+//
+// Return
+// balance
+// =========================================
+export async function loadBalance(provider, userAddress) {
+
+  // ใช้ Read Contract
+  const contract = getReadContract(provider);
+
+  // อ่าน Balance
+  const balance = await contract.balanceOf(userAddress);
+
+  // คืนค่า
+  return balance;
+}

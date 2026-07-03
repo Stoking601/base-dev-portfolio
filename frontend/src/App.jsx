@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   BrowserProvider,
-  Contract,
   formatUnits,
   parseUnits,
   isAddress,
@@ -11,6 +10,7 @@ import { CONTRACT_ADDRESS } from "./config";
 import {
   getReadContract,
   loadContractData,
+  loadBalance,
 } from "./services/tokenService";
 
 function App() {
@@ -25,20 +25,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   
-  // =========================
-  // Load balance
-  // =========================
-  async function loadBalance(provider, userAddress) {
-    const contract = new Contract(
-      CONTRACT_ADDRESS,
-      MyToken.abi,
-      provider
-    );
-
-    const bal = await contract.balanceOf(userAddress);
-
-    setBalance(formatUnits(bal, 18));
-  }
 
   // =========================
   // Load transfer history
@@ -99,10 +85,14 @@ function App() {
     // ===========================
     // โหลด Balance และ History
     // ===========================
-    await Promise.all([
-      loadBalance(provider, accounts[0]),
-      loadTransfers(provider),
-    ]);
+    const balance = await loadBalance(
+      provider,
+      accounts[0]
+    );
+
+    setBalance(formatUnits(balance, 18));
+
+    await loadTransfers(provider);
   }
 
   // =========================
@@ -146,10 +136,15 @@ function App() {
 
       await tx.wait();
 
-      await Promise.all([
-        loadBalance(provider, account),
-        loadTransfers(provider),
-      ]);
+      // รีเฟรช Balance หลัง Transfer
+      const balance = await loadBalance(
+        provider,
+        account
+      );
+
+      setBalance(formatUnits(balance, 18));
+
+      await loadTransfers(provider);
 
       setTo("");
       setAmount("");
@@ -221,12 +216,14 @@ function App() {
             disabled={loading}
           >
             {loading ? "Processing..." : "Send Token"}
+          </button>
+
             {txStatus && (
               <p>
                 <strong>Status:</strong> {txStatus}
               </p>
             )}
-          </button>
+          
 
           <hr />
 
@@ -253,7 +250,7 @@ function App() {
               </thead>
 
               <tbody>
-                {transfers.map((tx, index) => (
+                {transfers.map((tx) => (
                   <tr key={tx.txHash}>
                     <td>
                       {tx.from.slice(0, 6)}...
