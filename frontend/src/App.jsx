@@ -29,6 +29,22 @@ function App() {
   const [transfers, setTransfers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
+  const [copyStatus, setCopyStatus] = useState("");
+
+  async function copyAddress() {
+    try {
+      await navigator.clipboard.writeText(account);
+
+      setCopyStatus("Address copied!");
+
+      setTimeout(() => {
+        setCopyStatus("");
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+      setCopyStatus("Copy failed");
+    }
+  }
   // =========================
   // Connect wallet
   // =========================
@@ -72,6 +88,19 @@ function App() {
     const history = await loadTransfers(provider);
 
     setTransfers(history);
+  }
+  
+  // =========================
+  // Copy Wallet Address
+  // =========================
+  function copyAddress() {
+    navigator.clipboard.writeText(account);
+
+    setCopyStatus("Address copied!");
+
+    setTimeout(() => {
+      setCopyStatus("");
+    }, 2000);
   }
 
   // =========================
@@ -146,7 +175,11 @@ function App() {
 
       {account && (
         <>
-          <WalletCard account={account} />
+          <WalletCard
+            account={account}
+            copyAddress={copyAddress}
+            copyStatus={copyStatus}
+          />
 
           <TokenInfo
             name={name}
