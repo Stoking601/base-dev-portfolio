@@ -12,6 +12,11 @@ import {
   loadTransfers,
   sendToken,
 } from "./services/tokenService";
+import WalletCard from "./components/WalletCard";
+import TokenInfo from "./components/TokenInfo";
+import TransferForm from "./components/TransferForm";
+import TransferHistory from "./components/TransferHistory";
+
 
 function App() {
   const [account, setAccount] = useState("");
@@ -24,8 +29,6 @@ function App() {
   const [transfers, setTransfers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
-  
-
   // =========================
   // Connect wallet
   // =========================
@@ -143,108 +146,29 @@ function App() {
 
       {account && (
         <>
-          <h3>Connected Wallet</h3>
-          <p>{account}</p>
+          <WalletCard account={account} />
 
-          <h3>Token Info</h3>
-          <p>Name: {name}</p>
-          <p>Symbol: {symbol}</p>
-          <p>Total Supply: {totalSupply}</p>
-
-          <h3>My Balance</h3>
-          <p>{balance} {symbol}</p>
-
-          <hr />
-
-          <h3>Transfer Token</h3>
-
-          <input
-            type="text"
-            placeholder="Recipient Address"
-            value={to}
-            onChange={(e) => setTo(e.target.value)}
-            style={{ width: "420px", marginBottom: "10px" }}
+          <TokenInfo
+            name={name}
+            symbol={symbol}
+            totalSupply={totalSupply}
+            balance={balance}
           />
 
-          <br />
-
-          <input
-            type="number"
-            placeholder="Amount"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            style={{ width: "200px", marginBottom: "10px" }}
+          <TransferForm
+            to={to}
+            amount={amount}
+            setTo={setTo}
+            setAmount={setAmount}
+            loading={loading}
+            txStatus={txStatus}
+            transferToken={transferToken}
           />
-
-          <br />
-
-          <button
-            onClick={transferToken}
-            disabled={loading}
-          >
-            {loading ? "Processing..." : "Send Token"}
-          </button>
-
-            {txStatus && (
-              <p>
-                <strong>Status:</strong> {txStatus}
-              </p>
-            )}
           
 
-          <hr />
-
-          <h3>Recent Transfers</h3>
-
-          {transfers.length === 0 ? (
-            <p>No transfers found.</p>
-          ) : (
-            <table
-              border="1"
-              cellPadding="8"
-              style={{
-                margin: "auto",
-                borderCollapse: "collapse",
-              }}
-            >
-              <thead>
-                <tr>
-                  <th>From</th>
-                  <th>To</th>
-                  <th>Amount</th>
-                  <th>Tx</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {transfers.map((tx) => (
-                  <tr key={tx.txHash}>
-                    <td>
-                      {tx.from.slice(0, 6)}...
-                      {tx.from.slice(-4)}
-                    </td>
-
-                    <td>
-                      {tx.to.slice(0, 6)}...
-                      {tx.to.slice(-4)}
-                    </td>
-
-                    <td>{tx.amount}</td>
-
-                    <td>
-                      <a
-                        href={`https://sepolia.basescan.org/tx/${tx.txHash}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        View
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+          <TransferHistory
+            transfers={transfers}
+          />
         </>
       )}
     </div>
