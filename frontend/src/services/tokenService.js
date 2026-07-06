@@ -118,6 +118,9 @@ export async function loadTransfers(provider) {
 // Transaction Receipt
 // =========================================
 export async function sendToken(to, amount) {
+  if (!window.ethereum) {
+    throw new Error("MetaMask not found");
+  }
   try {
     const provider = new BrowserProvider(window.ethereum);
 

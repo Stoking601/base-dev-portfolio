@@ -16,6 +16,7 @@ import TokenInfo from "./components/TokenInfo";
 import TransferForm from "./components/TransferForm";
 import TransferHistory from "./components/TransferHistory";
 import useWallet from "./hooks/useWallet";
+import { useEffect } from "react";
 
 
 function App() {
@@ -161,6 +162,35 @@ function App() {
     }
   }
 
+
+  useEffect(() => {
+    if (!account || !provider) return;
+
+    async function refreshData() {
+      try {
+        // ===== Token Info =====
+        const token = await loadContractData(provider);
+
+        setName(token.name);
+        setSymbol(token.symbol);
+        setTotalSupply(formatUnits(token.totalSupply, 18));
+
+        // ===== Balance =====
+        const bal = await loadBalance(provider, account);
+        setBalance(formatUnits(bal, 18));
+
+        // ===== History =====
+        const history = await loadTransfers(provider);
+        setTransfers(history);
+
+      } catch (err) {
+        console.error("Refresh error:", err);
+      }
+    }
+
+    refreshData();
+  }, [account, provider]);
+  
   return (
     <div className="App">
       <h1>Base Dev Portfolio</h1>
