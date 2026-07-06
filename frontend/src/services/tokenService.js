@@ -3,7 +3,7 @@
 // รวมฟังก์ชันที่ใช้ติดต่อ Smart Contract
 // =========================================
 
-import { Contract } from "ethers";
+import { Contract, formatUnits } from "ethers";
 import MyToken from "../abi/MyToken.json";
 import { CONTRACT_ADDRESS } from "../config";
 
@@ -69,4 +69,38 @@ export async function loadBalance(provider, userAddress) {
 
   // คืนค่า
   return balance;
+}
+
+// =========================================
+// Load Transfer History
+// อ่านประวัติการโอนย้อนหลัง
+//
+// Parameter
+// provider
+//
+// Return
+// Array ของ Transfer History
+// =========================================
+export async function loadTransfers(provider) {
+
+  // ใช้ Read Contract
+  const contract = getReadContract(provider);
+
+  // Block ล่าสุด
+  const latestBlock = await provider.getBlockNumber();
+
+  // Query Event ย้อนหลัง 1000 Block
+  const events = await contract.queryFilter(
+    contract.filters.Transfer(),
+    Math.max(0, latestBlock - 1000),
+    latestBlock
+  );
+
+  // แปลงข้อมูลให้อ่านง่าย
+  return events.reverse().map((event) => ({
+    from: event.args[0],
+    to: event.args[1],
+    amount: formatUnits(event.args[2], 18),
+    txHash: event.transactionHash,
+  }));
 }

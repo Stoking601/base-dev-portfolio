@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   BrowserProvider,
+  Contract,
   formatUnits,
   parseUnits,
   isAddress,
@@ -8,9 +9,9 @@ import {
 import MyToken from "./abi/MyToken.json";
 import { CONTRACT_ADDRESS } from "./config";
 import {
-  getReadContract,
   loadContractData,
   loadBalance,
+  loadTransfers,
 } from "./services/tokenService";
 
 function App() {
@@ -25,32 +26,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   
-
-  // =========================
-  // Load transfer history
-  // =========================
-  async function loadTransfers(provider) {
-    const contract = getReadContract(provider);
-
-    const latestBlock = await provider.getBlockNumber();
-
-    const events = await contract.queryFilter(
-      contract.filters.Transfer(),
-      Math.max(0, latestBlock - 1000),
-      latestBlock
-    );
-
-    const history = events
-      .reverse()
-      .map((event) => ({
-        from: event.args[0],
-        to: event.args[1],
-        amount: formatUnits(event.args[2], 18),
-        txHash: event.transactionHash,
-      }));
-
-    setTransfers(history);
-  }
 
   // =========================
   // Connect wallet
@@ -92,7 +67,9 @@ function App() {
 
     setBalance(formatUnits(balance, 18));
 
-    await loadTransfers(provider);
+    const history = await loadTransfers(provider);
+
+    setTransfers(history);
   }
 
   // =========================
@@ -144,7 +121,9 @@ function App() {
 
       setBalance(formatUnits(balance, 18));
 
-      await loadTransfers(provider);
+      const history = await loadTransfers(provider);
+
+      setTransfers(history);
 
       setTo("");
       setAmount("");
