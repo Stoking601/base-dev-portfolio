@@ -1,9 +1,7 @@
 import { useState } from "react";
 import {
   BrowserProvider,
-  Contract,
   formatUnits,
-  parseUnits,
   isAddress,
 } from "ethers";
 import MyToken from "./abi/MyToken.json";
@@ -12,6 +10,7 @@ import {
   loadContractData,
   loadBalance,
   loadTransfers,
+  sendToken,
 } from "./services/tokenService";
 
 function App() {
@@ -95,23 +94,12 @@ function App() {
       setLoading(true);
       setTxStatus("Waiting for MetaMask confirmation...");
 
-      const provider = new BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-
-      const contract = new Contract(
-        CONTRACT_ADDRESS,
-        MyToken.abi,
-        signer
-      );
-
-      const tx = await contract.transfer(
+      const provider = await sendToken(
         to,
-        parseUnits(amount, 18)
+        amount
       );
 
-      setTxStatus("Transaction Pending...");
-
-      await tx.wait();
+      setTxStatus("Transaction Success!");
 
       // รีเฟรช Balance หลัง Transfer
       const balance = await loadBalance(
@@ -128,7 +116,7 @@ function App() {
       setTo("");
       setAmount("");
 
-      setTxStatus("Transaction Success!");
+      
 
     } catch (err) {
       console.error(err);

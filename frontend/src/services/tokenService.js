@@ -3,7 +3,12 @@
 // รวมฟังก์ชันที่ใช้ติดต่อ Smart Contract
 // =========================================
 
-import { Contract, formatUnits } from "ethers";
+import {
+  Contract,
+  BrowserProvider,
+  parseUnits,
+  formatUnits,
+} from "ethers";
 import MyToken from "../abi/MyToken.json";
 import { CONTRACT_ADDRESS } from "../config";
 
@@ -103,4 +108,39 @@ export async function loadTransfers(provider) {
     amount: formatUnits(event.args[2], 18),
     txHash: event.transactionHash,
   }));
+}
+
+// =========================================
+// Transfer Token
+// ส่ง Token ไปยัง Wallet ปลายทาง
+//
+// Return
+// Transaction Receipt
+// =========================================
+export async function sendToken(to, amount) {
+
+  // สร้าง Provider
+  const provider = new BrowserProvider(window.ethereum);
+
+  // ใช้ Wallet ของ MetaMask
+  const signer = await provider.getSigner();
+
+  // Contract สำหรับเขียนข้อมูล
+  const contract = new Contract(
+    CONTRACT_ADDRESS,
+    MyToken.abi,
+    signer
+  );
+
+  // ส่ง Transaction
+  const tx = await contract.transfer(
+    to,
+    parseUnits(amount, 18)
+  );
+
+  // รอ Confirm
+  await tx.wait();
+
+  // คืน Provider กลับไปใช้ Refresh Balance
+  return provider;
 }
