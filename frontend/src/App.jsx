@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  BrowserProvider,
   formatUnits,
   isAddress,
 } from "ethers";
@@ -16,10 +15,15 @@ import WalletCard from "./components/WalletCard";
 import TokenInfo from "./components/TokenInfo";
 import TransferForm from "./components/TransferForm";
 import TransferHistory from "./components/TransferHistory";
+import useWallet from "./hooks/useWallet";
 
 
 function App() {
-  const [account, setAccount] = useState("");
+  const {
+    account,
+    provider,
+    connectWallet,
+  } = useWallet();
   const [name, setName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [totalSupply, setTotalSupply] = useState("");
@@ -46,45 +50,37 @@ function App() {
     }
   }
   // =========================
-  // Connect wallet
+  // Connect walletgit
   // =========================
-  async function connectWallet() {
+  async function handleConnectWallet() {
     if (!window.ethereum) {
       alert("Please install MetaMask");
       return;
     }
 
-    // สร้าง Provider
-    const provider = new BrowserProvider(window.ethereum);
+    const wallet = await connectWallet();
 
-    // ขอเชื่อมต่อ MetaMask
-    const accounts = await provider.send(
-      "eth_requestAccounts",
-      []
-    );
+    if (!wallet) return;
 
-    // เก็บ Address
-    setAccount(accounts[0]);
+    const provider = wallet.provider;
+    const account = wallet.account;
 
-    // ===========================
     // โหลดข้อมูล Token
-    // ===========================
     const token = await loadContractData(provider);
 
     setName(token.name);
     setSymbol(token.symbol);
     setTotalSupply(formatUnits(token.totalSupply, 18));
 
-    // ===========================
-    // โหลด Balance และ History
-    // ===========================
+    // โหลด Balance
     const balance = await loadBalance(
       provider,
-      accounts[0]
+      account
     );
 
     setBalance(formatUnits(balance, 18));
 
+    // โหลด History
     const history = await loadTransfers(provider);
 
     setTransfers(history);
@@ -169,7 +165,7 @@ function App() {
     <div className="App">
       <h1>Base Dev Portfolio</h1>
 
-      <button onClick={connectWallet}>
+      <button onClick={handleConnectWallet}>
         Connect MetaMask
       </button>
 

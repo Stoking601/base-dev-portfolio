@@ -118,29 +118,67 @@ export async function loadTransfers(provider) {
 // Transaction Receipt
 // =========================================
 export async function sendToken(to, amount) {
+  try {
+    const provider = new BrowserProvider(window.ethereum);
 
-  // สร้าง Provider
-  const provider = new BrowserProvider(window.ethereum);
+    // สำคัญ: ขอ signer ใหม่ให้ชัวร์
+    await provider.send("eth_requestAccounts", []);
+    const signer = await provider.getSigner();
 
-  // ใช้ Wallet ของ MetaMask
-  const signer = await provider.getSigner();
+    const contract = new Contract(
+      CONTRACT_ADDRESS,
+      MyToken.abi,
+      signer
+    );
 
-  // Contract สำหรับเขียนข้อมูล
-  const contract = new Contract(
-    CONTRACT_ADDRESS,
-    MyToken.abi,
-    signer
-  );
+    // แปลงค่า
+    const parsedAmount = parseUnits(amount.toString(), 18);
 
-  // ส่ง Transaction
-  const tx = await contract.transfer(
-    to,
-    parseUnits(amount, 18)
-  );
+    // =========================
+    // DEBUG SECTION (สำคัญ)
+    // =========================
+    const sender = await signer.getAddress();
+    const balance = await contract.balanceOf(sender);
 
-  // รอ Confirm
-  await tx.wait();
+    console.log("Sender:", sender);
+    console.log("Balance:", formatUnits(balance, 18));
+    console.log("To:", to);
+    console.log("Amount:", amount);
 
-  // คืน Provider กลับไปใช้ Refresh Balance
-  return provider;
+    // =========================
+    // PRE-CHECK (กัน revert)
+    // =========================
+    if (balance < parsedAmount) {
+      throw new Error("Insufficient balance (frontend check)");
+    }
+
+    if (to.toLowerCase() === sender.toLowerCase()) {
+      throw new Error("Cannot send to yourself");
+    }
+
+    // =========================
+    // TRY CALL (decode error ได้ชัดขึ้น)
+    // =========================
+    try {
+      await contract.transfer.staticCall(to, parsedAmount);
+    } catch (err) {
+      console.error("STATICCALL ERROR:", err);
+      throw new Error(
+        err?.reason || "Contract will revert (pre-check failed)"
+      );
+    }
+
+    // =========================
+    // SEND TX
+    // =========================
+    const tx = await contract.transfer(to, parsedAmount);
+
+    await tx.wait();
+
+    return provider;
+
+  } catch (err) {
+    console.error("SEND TOKEN ERROR:", err);
+    throw err;
+  }
 }
