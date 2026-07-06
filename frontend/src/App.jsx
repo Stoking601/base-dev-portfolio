@@ -18,7 +18,7 @@ import TransferHistory from "./components/TransferHistory";
 import useWallet from "./hooks/useWallet";
 import { useEffect } from "react";
 import Toast from "./components/Toast";
-
+import { listenTransfers } from "./services/tokenService";
 
 function App() {
   const {
@@ -170,6 +170,19 @@ function App() {
 
     refreshData();
   }, [account, provider]);
+
+
+  useEffect(() => {
+    if (!provider) return;
+
+    const unsubscribe = listenTransfers(provider, (tx) => {
+      setTransfers((prev) => [tx, ...prev]);
+
+      showToast("New transfer detected", "info");
+    });
+
+    return () => unsubscribe();
+  }, [provider]);
 
 
   function showToast(message, type = "info") {

@@ -185,3 +185,21 @@ export async function sendToken(to, amount) {
     throw err;
   }
 }
+
+
+export function listenTransfers(provider, callback) {
+  const contract = getReadContract(provider);
+
+  contract.on("Transfer", (from, to, amount, event) => {
+    callback({
+      from,
+      to,
+      amount: formatUnits(amount, 18),
+      txHash: event.log.transactionHash,
+    });
+  });
+
+  return () => {
+    contract.removeAllListeners("Transfer");
+  };
+}
