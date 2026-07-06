@@ -50,13 +50,8 @@ function TransferForm({
       <br />
 
       {/* Send Button */}
-      <button
-        onClick={transferToken}
-        disabled={loading}
-      >
-        {loading
-          ? "Processing..."
-          : "Send Token"}
+      <button onClick={transferToken} disabled={loading}>
+        {loading ? "Processing..." : "Send Token"}
       </button>
 
       {/* Transaction Status */}

@@ -17,6 +17,7 @@ import TransferForm from "./components/TransferForm";
 import TransferHistory from "./components/TransferHistory";
 import useWallet from "./hooks/useWallet";
 import { useEffect } from "react";
+import Toast from "./components/Toast";
 
 
 function App() {
@@ -35,6 +36,8 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [txStatus, setTxStatus] = useState("");
   const [copyStatus, setCopyStatus] = useState("");
+  const [toast, setToast] = useState("");
+  const [toastType, setToastType] = useState("info");
 
   async function copyAddress() {
     try {
@@ -106,57 +109,34 @@ function App() {
   async function transferToken() {
     try {
       if (!to || !amount) {
-        alert("Please fill address and amount");
+        showToast("Please fill all fields", "error");
         return;
       }
 
       if (!isAddress(to)) {
-        alert("Invalid wallet address");
-        return;
-      }
-
-      if (Number(amount) <= 0) {
-        alert("Amount must be greater than 0");
+        showToast("Invalid address", "error");
         return;
       }
 
       setLoading(true);
-      setTxStatus("Waiting for MetaMask confirmation...");
+      showToast("Confirm transaction in MetaMask...", "info");
 
-      const provider = await sendToken(
-        to,
-        amount
-      );
+      const provider = await sendToken(to, amount);
 
-      setTxStatus("Transaction Success!");
+      showToast("Transaction successful!", "success");
 
-      // รีเฟรช Balance หลัง Transfer
-      const balance = await loadBalance(
-        provider,
-        account
-      );
-
-      setBalance(formatUnits(balance, 18));
+      const bal = await loadBalance(provider, account);
+      setBalance(formatUnits(bal, 18));
 
       const history = await loadTransfers(provider);
-
       setTransfers(history);
 
       setTo("");
       setAmount("");
 
-      
-
     } catch (err) {
       console.error(err);
-
-      setTxStatus(
-        err.shortMessage ||
-        err.reason ||
-        err.message ||
-        "Transaction Failed"
-      );
-
+      showToast(err.message || "Transaction failed", "error");
     } finally {
       setLoading(false);
     }
@@ -190,7 +170,19 @@ function App() {
 
     refreshData();
   }, [account, provider]);
-  
+
+
+  function showToast(message, type = "info") {
+    setToast(message);
+    setToastType(type);
+
+    setTimeout(() => {
+      setToast("");
+    }, 2500);
+  }
+
+  <Toast message={toast} type={toastType} />
+
   return (
     <div className="App">
       <h1>Base Dev Portfolio</h1>
