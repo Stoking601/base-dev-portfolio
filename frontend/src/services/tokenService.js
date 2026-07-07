@@ -203,3 +203,29 @@ export function listenTransfers(provider, callback) {
     contract.removeAllListeners("Transfer");
   };
 }
+
+export async function approveToken(
+  spender,
+  amount
+) {
+  const provider = new BrowserProvider(
+    window.ethereum
+  );
+
+  const signer = await provider.getSigner();
+
+  const contract = new Contract(
+    CONTRACT_ADDRESS,
+    MyToken.abi,
+    signer
+  );
+
+  const tx = await contract.approve(
+    spender,
+    parseUnits(amount, 18)
+  );
+
+  await tx.wait();
+
+  return provider;
+}

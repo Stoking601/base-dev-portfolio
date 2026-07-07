@@ -20,6 +20,8 @@ import { useEffect } from "react";
 import Toast from "./components/Toast";
 import { listenTransfers } from "./services/tokenService";
 import { getErrorMessage } from "./utils/errorHandler";
+import ApproveForm from "./components/ApproveForm";
+import { approveToken } from "./services/tokenService";
 
 function App() {
   const {
@@ -39,6 +41,37 @@ function App() {
   const [copyStatus, setCopyStatus] = useState("");
   const [toast, setToast] = useState("");
   const [toastType, setToastType] = useState("info");
+  const [spender, setSpender] = useState("");
+  const [approveAmount, setApproveAmount] = useState("");
+
+
+  async function handleApprove() {
+    try {
+      setLoading(true);
+
+      await approveToken(
+        spender,
+        approveAmount
+      );
+
+      showToast(
+        "Approve Success",
+        "success"
+      );
+
+      setSpender("");
+      setApproveAmount("");
+
+    } catch (err) {
+      showToast(
+        getErrorMessage(err),
+        "error"
+      );
+
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function copyAddress() {
     try {
@@ -233,6 +266,15 @@ function App() {
             loading={loading}
             txStatus={txStatus}
             transferToken={transferToken}
+          />
+
+          <ApproveForm
+            spender={spender}
+            amount={approveAmount}
+            setSpender={setSpender}
+            setAmount={setApproveAmount}
+            approveToken={handleApprove}
+            loading={loading}
           />
           
 
