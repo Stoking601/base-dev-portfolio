@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import { BrowserProvider } from "ethers";
+import {
+  checkNetwork,
+  switchNetwork,
+} from "../utils/network";
 
 export default function useWallet() {
   const [account, setAccount] = useState("");
@@ -10,6 +14,13 @@ export default function useWallet() {
     if (!eth) return;
 
     const provider = new BrowserProvider(eth);
+
+    const correctNetwork =
+      await checkNetwork();
+
+    if (!correctNetwork) {
+      await switchNetwork();
+    }
 
     const accounts = await provider.send("eth_requestAccounts", []);
 

@@ -131,7 +131,20 @@ function App() {
       return;
     }
 
-    const wallet = await connectWallet();
+    let wallet;
+
+    try {
+      wallet = await connectWallet();
+
+    } catch (err) {
+
+      showToast(
+        "Please switch to Base Sepolia",
+        "error"
+      );
+
+      return;
+    }
 
     if (!wallet) return;
 
