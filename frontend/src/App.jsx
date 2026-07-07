@@ -26,6 +26,7 @@ import TransferFromForm from "./components/TransferFromForm";
 import { approveToken } from "./services/tokenService";
 import AllowanceCard from "./components/AllowanceCard";
 import { getAllowance } from "./services/tokenService";
+import TransactionReceipt from "./components/TransactionReceipt";
 
 
 function App() {
@@ -56,16 +57,20 @@ function App() {
   const [fromAddress, setFromAddress] = useState("");
   const [transferTo, setTransferTo] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
+  const [receipt, setReceipt] = useState(null);
 
 
   async function handleApprove() {
     try {
       setLoading(true);
 
-      await approveToken(
-        spender,
-        approveAmount
-      );
+      const result =
+        await approveToken(
+          spender,
+          approveAmount
+        );
+
+      setReceipt(result.receipt);
 
       showToast(
         "Approve Success",
@@ -203,7 +208,14 @@ function App() {
       setLoading(true);
       showToast("Confirm transaction in MetaMask...", "info");
 
-      const provider = await sendToken(to, amount);
+      const result = await sendToken(
+        to,
+        amount
+      );
+
+      const provider = result.provider;
+
+      setReceipt(result.receipt);
 
       showToast("Transaction successful!", "success");
 
@@ -288,11 +300,15 @@ function App() {
     try {
       setLoading(true);
 
-      await transferFromToken(
+      const result = await transferFromToken(
         fromAddress,
         transferTo,
         transferAmount
       );
+
+      const provider = result.provider;
+
+      setReceipt(result.receipt);
 
       showToast(
         "Transfer From Success",
@@ -426,6 +442,10 @@ function App() {
             loading={loading}
           />
 
+          <TransactionReceipt
+            receipt={receipt}
+          />
+          
           <TransferHistory
             transfers={transfers}
           />

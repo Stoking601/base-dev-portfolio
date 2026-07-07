@@ -176,9 +176,12 @@ export async function sendToken(to, amount) {
     // =========================
     const tx = await contract.transfer(to, parsedAmount);
 
-    await tx.wait();
+    const receipt = await tx.wait();
 
-    return provider;
+    return {
+      provider,
+      receipt,
+    };
 
   } catch (err) {
     console.error("SEND TOKEN ERROR:", err);
@@ -225,9 +228,12 @@ export async function approveToken(
     parseUnits(amount, 18)
   );
 
-  await tx.wait();
+  const receipt = await tx.wait();
 
-  return provider;
+  return {
+    provider,
+    receipt,
+  };
 }
 
 // =========================================
@@ -278,7 +284,10 @@ export async function transferFromToken(
   );
 
   // รอ Confirm
-  await tx.wait();
+  const receipt = await tx.wait();
 
-  return provider;
+  return {
+    provider,
+    receipt,
+  };
 }
