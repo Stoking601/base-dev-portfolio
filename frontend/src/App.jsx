@@ -27,6 +27,7 @@ import { approveToken } from "./services/tokenService";
 import AllowanceCard from "./components/AllowanceCard";
 import { getAllowance } from "./services/tokenService";
 import TransactionReceipt from "./components/TransactionReceipt";
+import Dashboard from "./components/Dashboard";
 
 
 function App() {
@@ -59,6 +60,9 @@ function App() {
   const [transferAmount, setTransferAmount] = useState("");
   const [receipt, setReceipt] = useState(null);
   const [copyHashStatus, setCopyHashStatus] = useState("");
+  const [totalSent, setTotalSent] = useState(0);
+  const [totalReceived, setTotalReceived] = useState(0);
+  const [uniqueWallets, setUniqueWallets] = useState(0);
 
 
   async function handleApprove() {
@@ -176,6 +180,40 @@ function App() {
     const history = await loadTransfers(provider);
 
     setTransfers(history);
+
+    let sent = 0;
+    let received = 0;
+
+    const wallets = new Set();
+
+    history.forEach((tx) => {
+
+      wallets.add(tx.from);
+
+      wallets.add(tx.to);
+
+      if (
+        tx.from.toLowerCase() ===
+        account.toLowerCase()
+      ) {
+        sent += Number(tx.amount);
+      }
+
+      if (
+        tx.to.toLowerCase() ===
+        account.toLowerCase()
+      ) {
+        received += Number(tx.amount);
+      }
+
+    });
+
+    setTotalSent(sent);
+
+    setTotalReceived(received);
+
+    setUniqueWallets(wallets.size);
+
   }
   
   // =========================
@@ -226,6 +264,39 @@ function App() {
       const history = await loadTransfers(provider);
       setTransfers(history);
 
+      let sent = 0;
+      let received = 0;
+
+      const wallets = new Set();
+
+      history.forEach((tx) => {
+
+        wallets.add(tx.from);
+
+        wallets.add(tx.to);
+
+        if (
+          tx.from.toLowerCase() ===
+          account.toLowerCase()
+        ) {
+          sent += Number(tx.amount);
+        }
+
+        if (
+          tx.to.toLowerCase() ===
+          account.toLowerCase()
+        ) {
+          received += Number(tx.amount);
+        }
+
+      });
+
+      setTotalSent(sent);
+
+      setTotalReceived(received);
+
+      setUniqueWallets(wallets.size);
+
       setTo("");
       setAmount("");
 
@@ -262,6 +333,39 @@ function App() {
         // ===== History =====
         const history = await loadTransfers(provider);
         setTransfers(history);
+
+        let sent = 0;
+        let received = 0;
+
+        const wallets = new Set();
+
+        history.forEach((tx) => {
+
+          wallets.add(tx.from);
+
+          wallets.add(tx.to);
+
+          if (
+            tx.from.toLowerCase() ===
+            account.toLowerCase()
+          ) {
+            sent += Number(tx.amount);
+          }
+
+          if (
+            tx.to.toLowerCase() ===
+            account.toLowerCase()
+          ) {
+            received += Number(tx.amount);
+          }
+
+        });
+
+        setTotalSent(sent);
+
+        setTotalReceived(received);
+
+        setUniqueWallets(wallets.size);
 
       } catch (err) {
         console.error("Refresh error:", err);
@@ -328,6 +432,39 @@ function App() {
       const history = await loadTransfers(provider);
 
       setTransfers(history);
+
+      let sent = 0;
+      let received = 0;
+
+      const wallets = new Set();
+
+      history.forEach((tx) => {
+
+        wallets.add(tx.from);
+
+        wallets.add(tx.to);
+
+        if (
+          tx.from.toLowerCase() ===
+          account.toLowerCase()
+        ) {
+          sent += Number(tx.amount);
+        }
+
+        if (
+          tx.to.toLowerCase() ===
+          account.toLowerCase()
+        ) {
+          received += Number(tx.amount);
+        }
+
+      });
+
+      setTotalSent(sent);
+
+      setTotalReceived(received);
+
+      setUniqueWallets(wallets.size);
 
       // Refresh Allowance
       const value = await getAllowance(
@@ -417,6 +554,13 @@ function App() {
             account={account}
             copyAddress={copyAddress}
             copyStatus={copyStatus}
+          />
+
+          <Dashboard
+            totalTx={transfers.length}
+            totalSent={totalSent}
+            totalReceived={totalReceived}
+            uniqueWallets={uniqueWallets}
           />
 
           <TokenInfo
