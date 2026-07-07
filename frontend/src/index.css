@@ -109,3 +109,34 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.App {
+  min-height: 100vh;
+  padding: 30px;
+  transition: 0.3s;
+}
+
+.App.dark {
+  background: #121212;
+  color: white;
+}
+
+.App.dark input {
+  background: #1e1e1e;
+  color: white;
+  border: 1px solid #555;
+}
+
+.App.dark button {
+  background: #333;
+  color: white;
+  border: 1px solid #666;
+}
+
+.App.dark table {
+  color: white;
+}
+
+.App.dark a {
+  color: #61dafb;
+}

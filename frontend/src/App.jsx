@@ -28,6 +28,7 @@ import AllowanceCard from "./components/AllowanceCard";
 import { getAllowance } from "./services/tokenService";
 import TransactionReceipt from "./components/TransactionReceipt";
 import Dashboard from "./components/Dashboard";
+import ThemeToggle from "./components/ThemeToggle";
 
 
 function App() {
@@ -63,6 +64,8 @@ function App() {
   const [totalSent, setTotalSent] = useState(0);
   const [totalReceived, setTotalReceived] = useState(0);
   const [uniqueWallets, setUniqueWallets] = useState(0);
+  const [darkMode, setDarkMode] =
+  useState(false);
 
 
   async function handleApprove() {
@@ -540,9 +543,24 @@ function App() {
     }
   }
 
+  function toggleTheme() {
+    setDarkMode(!darkMode);
+  }
+
   return (
-    <div className="App">
+    <div
+      className={
+        darkMode
+          ? "App dark"
+          : "App"
+      }
+    >
       <h1>Base Dev Portfolio</h1>
+      
+      <ThemeToggle
+        darkMode={darkMode}
+        toggleTheme={toggleTheme}
+      />
 
       <button onClick={handleConnectWallet}>
         Connect MetaMask
