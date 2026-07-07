@@ -8,6 +8,8 @@ function TransferHistory({
   currentPage,
   totalPages,
   setCurrentPage,
+  search,
+  setSearch,
 }) {
   return (
     <>
@@ -17,6 +19,21 @@ function TransferHistory({
       {/* Transfer History */}
       {/* ========================= */}
       <h3>Recent Transfers</h3>
+
+      <input
+        type="text"
+        placeholder="Search Address or Tx Hash..."
+        value={search}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setCurrentPage(1);
+        }}
+        style={{
+          width: "450px",
+          padding: "8px",
+          marginBottom: "20px",
+        }}
+      />
 
       {transfers.length === 0 ? (
         <p>No transfers found.</p>

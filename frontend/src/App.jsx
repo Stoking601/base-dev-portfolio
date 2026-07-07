@@ -71,6 +71,8 @@ function App() {
 
   const transfersPerPage = 5;
 
+  const [search, setSearch] = useState("");
+
 
   async function handleApprove() {
     try {
@@ -560,14 +562,25 @@ function App() {
   const firstIndex =
     lastIndex - transfersPerPage;
 
-  const currentTransfers =
-    transfers.slice(
-      firstIndex,
-      lastIndex
+  const filteredTransfers = transfers.filter((tx) => {
+
+    const keyword = search.toLowerCase();
+
+    return (
+      tx.from.toLowerCase().includes(keyword) ||
+      tx.to.toLowerCase().includes(keyword) ||
+      tx.txHash.toLowerCase().includes(keyword)
     );
 
+  });
+
   const totalPages = Math.ceil(
-    transfers.length / transfersPerPage
+    filteredTransfers.length / transfersPerPage
+  );
+
+  const currentTransfers = filteredTransfers.slice(
+    firstIndex,
+    lastIndex
   );
 
   return (
@@ -656,6 +669,8 @@ function App() {
             currentPage={currentPage}
             totalPages={totalPages}
             setCurrentPage={setCurrentPage}
+            search={search}
+            setSearch={setSearch}
           />
         </>
       )}
