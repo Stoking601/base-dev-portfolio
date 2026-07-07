@@ -58,6 +58,7 @@ function App() {
   const [transferTo, setTransferTo] = useState("");
   const [transferAmount, setTransferAmount] = useState("");
   const [receipt, setReceipt] = useState(null);
+  const [copyHashStatus, setCopyHashStatus] = useState("");
 
 
   async function handleApprove() {
@@ -385,6 +386,23 @@ function App() {
 
   <Toast message={toast} type={toastType} />
 
+  async function copyTxHash(hash) {
+    try {
+
+      await navigator.clipboard.writeText(hash);
+
+      setCopyHashStatus("Copied!");
+
+      setTimeout(() => {
+        setCopyHashStatus("");
+      }, 2000);
+
+    } catch {
+
+      setCopyHashStatus("Copy failed");
+    }
+  }
+
   return (
     <div className="App">
       <h1>Base Dev Portfolio</h1>
@@ -444,8 +462,10 @@ function App() {
 
           <TransactionReceipt
             receipt={receipt}
+            copyTxHash={copyTxHash}
+            copyHashStatus={copyHashStatus}
           />
-          
+
           <TransferHistory
             transfers={transfers}
           />

@@ -1,4 +1,8 @@
-function TransactionReceipt({ receipt }) {
+function TransactionReceipt({
+  receipt,
+  copyTxHash,
+  copyHashStatus,
+}) {
   if (!receipt) return null;
 
   return (
@@ -20,6 +24,26 @@ function TransactionReceipt({ receipt }) {
       <p>
         <strong>Hash :</strong>
       </p>
+      
+      <p
+        style={{
+            wordBreak: "break-all",
+        }}
+      >
+        {receipt.hash}
+      </p>
+
+      <button
+        onClick={() =>
+            copyTxHash(receipt.hash)
+        }
+      >
+        Copy Hash
+      </button>
+
+      {copyHashStatus && (
+        <p>{copyHashStatus}</p>
+      )}
 
       <a
         href={`https://sepolia.basescan.org/tx/${receipt.hash}`}
