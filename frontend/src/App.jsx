@@ -22,6 +22,8 @@ import { listenTransfers } from "./services/tokenService";
 import { getErrorMessage } from "./utils/errorHandler";
 import ApproveForm from "./components/ApproveForm";
 import { approveToken } from "./services/tokenService";
+import AllowanceCard from "./components/AllowanceCard";
+import { getAllowance } from "./services/tokenService";
 
 function App() {
   const {
@@ -43,6 +45,8 @@ function App() {
   const [toastType, setToastType] = useState("info");
   const [spender, setSpender] = useState("");
   const [approveAmount, setApproveAmount] = useState("");
+  const [allowance, setAllowance] =
+  useState("0");
 
 
   async function handleApprove() {
@@ -59,6 +63,8 @@ function App() {
         "success"
       );
 
+      await checkAllowance();
+
       setSpender("");
       setApproveAmount("");
 
@@ -70,6 +76,26 @@ function App() {
 
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function checkAllowance() {
+    try {
+      if (!provider) return;
+
+      const value =
+        await getAllowance(
+          provider,
+          account,
+          spender
+        );
+
+      setAllowance(
+        formatUnits(value, 18)
+      );
+
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -275,6 +301,10 @@ function App() {
             setAmount={setApproveAmount}
             approveToken={handleApprove}
             loading={loading}
+          />
+
+          <AllowanceCard
+            allowance={allowance}
           />
           
 

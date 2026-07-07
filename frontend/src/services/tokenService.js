@@ -229,3 +229,19 @@ export async function approveToken(
 
   return provider;
 }
+
+// =========================================
+// Check Allowance
+// =========================================
+export async function getAllowance(
+  provider,
+  owner,
+  spender
+) {
+  const contract = getReadContract(provider);
+
+  return await contract.allowance(
+    owner,
+    spender
+  );
+}
