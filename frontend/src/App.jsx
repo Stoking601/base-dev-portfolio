@@ -67,6 +67,10 @@ function App() {
   const [darkMode, setDarkMode] =
   useState(false);
 
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const transfersPerPage = 5;
+
 
   async function handleApprove() {
     try {
@@ -183,6 +187,7 @@ function App() {
     const history = await loadTransfers(provider);
 
     setTransfers(history);
+    setCurrentPage(1);
 
     let sent = 0;
     let received = 0;
@@ -266,6 +271,7 @@ function App() {
 
       const history = await loadTransfers(provider);
       setTransfers(history);
+      setCurrentPage(1);
 
       let sent = 0;
       let received = 0;
@@ -518,6 +524,7 @@ function App() {
         await loadTransfers(provider);
 
       setTransfers(history);
+      setCurrentPage(1);
     }
 
     refresh();
@@ -546,6 +553,22 @@ function App() {
   function toggleTheme() {
     setDarkMode(!darkMode);
   }
+
+  const lastIndex =
+    currentPage * transfersPerPage;
+
+  const firstIndex =
+    lastIndex - transfersPerPage;
+
+  const currentTransfers =
+    transfers.slice(
+      firstIndex,
+      lastIndex
+    );
+
+  const totalPages = Math.ceil(
+    transfers.length / transfersPerPage
+  );
 
   return (
     <div
@@ -629,7 +652,10 @@ function App() {
           />
 
           <TransferHistory
-            transfers={transfers}
+            transfers={currentTransfers}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
           />
         </>
       )}
