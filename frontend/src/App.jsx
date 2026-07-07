@@ -19,6 +19,7 @@ import useWallet from "./hooks/useWallet";
 import { useEffect } from "react";
 import Toast from "./components/Toast";
 import { listenTransfers } from "./services/tokenService";
+import { getErrorMessage } from "./utils/errorHandler";
 
 function App() {
   const {
@@ -136,7 +137,12 @@ function App() {
 
     } catch (err) {
       console.error(err);
-      showToast(err.message || "Transaction failed", "error");
+
+      showToast(
+        getErrorMessage(err),
+        "error"
+      );
+
     } finally {
       setLoading(false);
     }
