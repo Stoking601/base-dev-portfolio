@@ -327,6 +327,33 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    if (!provider || !account) return;
+
+    async function refresh() {
+      const token = await loadContractData(provider);
+
+      setName(token.name);
+      setSymbol(token.symbol);
+      setTotalSupply(formatUnits(token.totalSupply, 18));
+
+      const bal = await loadBalance(
+        provider,
+        account
+      );
+
+      setBalance(formatUnits(bal, 18));
+
+      const history =
+        await loadTransfers(provider);
+
+      setTransfers(history);
+    }
+
+    refresh();
+
+  }, [account]);
+
   <Toast message={toast} type={toastType} />
 
   return (

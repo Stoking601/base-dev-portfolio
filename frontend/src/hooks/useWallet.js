@@ -36,6 +36,32 @@ export default function useWallet() {
     auto();
   }, []);
 
+  useEffect(() => {
+    if (!window.ethereum) return;
+
+    const handleAccountsChanged = (accounts) => {
+      if (accounts.length === 0) {
+        setAccount("");
+        setProvider(null);
+        return;
+      }
+
+      setAccount(accounts[0]);
+    };
+
+    window.ethereum.on(
+      "accountsChanged",
+      handleAccountsChanged
+    );
+
+    return () => {
+      window.ethereum.removeListener(
+        "accountsChanged",
+        handleAccountsChanged
+      );
+    };
+  }, []);
+
   return {
     account,
     provider,
