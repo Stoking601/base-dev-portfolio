@@ -10,6 +10,7 @@ import {
   loadBalance,
   loadTransfers,
   sendToken,
+  transferFromToken,
 } from "./services/tokenService";
 import WalletCard from "./components/WalletCard";
 import TokenInfo from "./components/TokenInfo";
@@ -21,9 +22,11 @@ import Toast from "./components/Toast";
 import { listenTransfers } from "./services/tokenService";
 import { getErrorMessage } from "./utils/errorHandler";
 import ApproveForm from "./components/ApproveForm";
+import TransferFromForm from "./components/TransferFromForm";
 import { approveToken } from "./services/tokenService";
 import AllowanceCard from "./components/AllowanceCard";
 import { getAllowance } from "./services/tokenService";
+
 
 function App() {
   const {
@@ -47,6 +50,12 @@ function App() {
   const [approveAmount, setApproveAmount] = useState("");
   const [allowance, setAllowance] =
   useState("0");
+  // =========================
+  // Transfer From State
+  // =========================
+  const [fromAddress, setFromAddress] = useState("");
+  const [transferTo, setTransferTo] = useState("");
+  const [transferAmount, setTransferAmount] = useState("");
 
 
   async function handleApprove() {
@@ -259,6 +268,65 @@ function App() {
     }, 2500);
   }
 
+  // =========================
+  // Transfer From
+  // =========================
+  async function handleTransferFrom() {
+    try {
+      setLoading(true);
+
+      await transferFromToken(
+        fromAddress,
+        transferTo,
+        transferAmount
+      );
+
+      showToast(
+        "Transfer From Success",
+        "success"
+      );
+
+      // Refresh Balance
+      const bal = await loadBalance(
+        provider,
+        account
+      );
+
+      setBalance(formatUnits(bal, 18));
+
+      // Refresh History
+      const history = await loadTransfers(provider);
+
+      setTransfers(history);
+
+      // Refresh Allowance
+      const value = await getAllowance(
+        provider,
+        fromAddress,
+        account
+      );
+
+      setAllowance(
+        formatUnits(value, 18)
+      );
+
+      // Clear Form
+      setFromAddress("");
+      setTransferTo("");
+      setTransferAmount("");
+
+    } catch (err) {
+
+      showToast(
+        getErrorMessage(err),
+        "error"
+      );
+
+    } finally {
+      setLoading(false);
+    }
+  }
+
   <Toast message={toast} type={toastType} />
 
   return (
@@ -307,6 +375,16 @@ function App() {
             allowance={allowance}
           />
           
+          <TransferFromForm
+            from={fromAddress}
+            to={transferTo}
+            amount={transferAmount}
+            setFrom={setFromAddress}
+            setTo={setTransferTo}
+            setAmount={setTransferAmount}
+            transferFromToken={handleTransferFrom}
+            loading={loading}
+          />
 
           <TransferHistory
             transfers={transfers}

@@ -245,3 +245,40 @@ export async function getAllowance(
     spender
   );
 }
+
+// =========================================
+// Transfer From
+// ใช้ Allowance โอน Token แทนเจ้าของ
+// =========================================
+export async function transferFromToken(
+  from,
+  to,
+  amount
+) {
+  // ใช้ MetaMask
+  const provider = new BrowserProvider(
+    window.ethereum
+  );
+
+  // Wallet ปัจจุบันจะเป็น spender
+  const signer = await provider.getSigner();
+
+  // Write Contract
+  const contract = new Contract(
+    CONTRACT_ADDRESS,
+    MyToken.abi,
+    signer
+  );
+
+  // เรียก transferFrom()
+  const tx = await contract.transferFrom(
+    from,
+    to,
+    parseUnits(amount, 18)
+  );
+
+  // รอ Confirm
+  await tx.wait();
+
+  return provider;
+}
